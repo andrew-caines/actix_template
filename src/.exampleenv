@@ -1,0 +1,4 @@
+#Re-create this file with the name .env example is uploaded so that you know its a requirement.
+#Assumptions to be changed.  DB server is Postgres, DB server IP is localhost, Username (postgres) and Password (password) and DB is test.
+#Table Schema's are found in the models directory
+DB_URL=postgres://postgres:password@localhost/test
