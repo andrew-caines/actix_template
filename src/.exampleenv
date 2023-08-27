@@ -1,4 +1,5 @@
 #Re-create this file with the name .env example is uploaded so that you know its a requirement.
-#Assumptions to be changed.  DB server is Postgres, DB server IP is localhost, Username (postgres) and Password (password) and DB is test.
+#Assumptions to be changed.  DB server is Postgres, DB server IP is 172.22.27.92:5432, Username (username) and Password (password) and DB is application.
 #Table Schema's are found in the models directory
-DATABASE_URL=postgres://postgres:password@localhost/test
+#THE .ENV file must be placed above /src directory peered with cargo.toml
+DATABASE_URL=postgresql://username:password@172.22.27.92:5432/application
