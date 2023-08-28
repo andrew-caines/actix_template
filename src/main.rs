@@ -13,6 +13,7 @@ mod state;
 
 #[actix_rt::main]
 async fn main() -> io::Result<()> {
+    
     //Load enviroment varibles.
     dotenv().ok();
 
@@ -25,13 +26,15 @@ async fn main() -> io::Result<()> {
         .await
         .expect("Unable to connect to DB (connect)");
 
-    //Spin up Webserver and initate state
+    //Initate State
     let app_state = web::Data::new(AppState {
         application_name: String::from("Actix Web Template DB:(Sqlx)"),
         health_check_count: Arc::new(Mutex::new(0)),
         last_check_time: Arc::new(Mutex::new(Utc::now())),
         pg_db: db_pool.clone(),
     });
+
+    //Spin Up Web Server
     println!("🚀 Server started @ 127.0.0.1:8080"); //TODO make this a constant string that is edited or comes from .env
     HttpServer::new(move || {
         App::new()
