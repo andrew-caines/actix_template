@@ -1,6 +1,8 @@
+use std::sync::{Mutex, Arc, MutexGuard};
+
 use crate::state::AppState;
 use actix_web::{web, HttpResponse, Responder};
-use chrono::{DateTime, NaiveDateTime, Utc};
+use chrono::{DateTime, NaiveDateTime, Utc, Duration};
 use serde::Serialize;
 use sqlx::FromRow;
 
@@ -22,21 +24,37 @@ pub async fn get_health_check(app_state: web::Data<AppState>) -> impl Responder 
     response
 }
 
-pub async fn get_echo_time(app_state: web::Data<AppState>) -> impl Responder {
-    //This just echos back the server time to console, used for load testing / uptime testing etc, it will return the time in local date time.
-    //Copy out old echo time, display diff, update last echo time
+fn get_time_diff(start_time: &Arc<Mutex<DateTime<Utc>>>) -> Duration {
+    //This function is broken out, so that you can visually see the drop of the Mutex lock, when this function ends.
+    //The guard rails put on this, was created since stress testing cause the Mutex to Poison, this way if it does get poisoned
+    //its immeditly corrected.
 
     let now: DateTime<Utc> = Utc::now();
-    let mut last_echo_time = app_state.last_check_time.lock().unwrap();
+    let mut last_echo_time: MutexGuard<DateTime<Utc>> = match start_time.lock()
+    {
+        Ok(guard) => guard,
+        Err(poisoned) => {
+            //Handle Mutex Poisoning
+            let guard = poisoned.into_inner();
+            println!("[get_time_diff] >> Recovered from mutex poisoning: {:?}", *guard);
+            guard
+        }
+    };
     let diff = now.time() - last_echo_time.time();
+    *last_echo_time = now;
+    diff
+}
+
+pub async fn get_echo_time(app_state: web::Data<AppState>) -> impl Responder {
+    //Calculate the difference between last visit to route. Then stash requestion in handler_log db.
+
+    let now: DateTime<Utc> = Utc::now();
+    let diff = get_time_diff(&app_state.last_check_time);
     let response = format!(
         "{} time diff since last check: {} seconds",
         now,
         diff.num_seconds()
     );
-    *last_echo_time = now;
-    //Now write entry to DB handler_logs (helps with stress testing too! :))
-    //TODO UNDER ANY LOAD THIS DOESNT WORK, CLOSE CONNECTION MANUALLY OR ??!@
     let _ = sqlx::query!(
         "
         INSERT INTO
@@ -44,7 +62,7 @@ pub async fn get_echo_time(app_state: web::Data<AppState>) -> impl Responder {
         VALUES
         (
             'get_echo_time',
-            'A query as put into get_echo_time'
+            'A Query was made to /util/echo'
         )"
     )
     .execute(&app_state.pg_db)
@@ -54,11 +72,9 @@ pub async fn get_echo_time(app_state: web::Data<AppState>) -> impl Responder {
 
 pub async fn get_handler_logs(app_state: web::Data<AppState>) -> impl Responder {
     //This route will get all entries in the handler_logs table and display them.
-    //sqlx::query_as("SELECT * FROM handler_logs")
     let logs = sqlx::query_as::<_, HandlerLog>("SELECT * FROM handler_logs")
         .fetch_all(&app_state.pg_db)
         .await
         .unwrap();
-    //println!("{:?}", logs);
     HttpResponse::Ok().json(logs)
 }

@@ -2,11 +2,11 @@ use actix_web::web;
 use actix_web::{App, HttpServer};
 use chrono::Utc;
 use dotenv::dotenv;
-use sqlx::postgres::PgPool;
+use sqlx::postgres::PgPoolOptions;
 use state::AppState;
 use std::env;
 use std::io;
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 mod handlers;
 mod routes;
 mod state;
@@ -19,17 +19,20 @@ async fn main() -> io::Result<()> {
     //Get DB connection URL.
     let database_url =
         env::var("DATABASE_URL").expect("DATABASE_URL is not present in .ENV file. Required.");
-    let db_pool = PgPool::connect(&database_url)
+    let db_pool = PgPoolOptions::new()
+        .max_connections(16)
+        .connect(&database_url)
         .await
         .expect("Unable to connect to DB (connect)");
 
     //Spin up Webserver and initate state
     let app_state = web::Data::new(AppState {
         application_name: String::from("Actix Web Template DB:(Sqlx)"),
-        health_check_count: Mutex::new(0),
-        last_check_time: Mutex::new(Utc::now()),
-        pg_db: db_pool,
+        health_check_count: Arc::new(Mutex::new(0)),
+        last_check_time: Arc::new(Mutex::new(Utc::now())),
+        pg_db: db_pool.clone(),
     });
+    println!("🚀 Server started @ 127.0.0.1:8080"); //TODO make this a constant string that is edited or comes from .env
     HttpServer::new(move || {
         App::new()
             .app_data(app_state.clone())
