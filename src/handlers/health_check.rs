@@ -1,8 +1,8 @@
-use std::sync::{Mutex, Arc, MutexGuard};
+use std::sync::{Arc, Mutex, MutexGuard};
 
 use crate::state::AppState;
 use actix_web::{web, HttpResponse, Responder};
-use chrono::{DateTime, NaiveDateTime, Utc, Duration};
+use chrono::{DateTime, Duration, NaiveDateTime, Utc};
 use serde::Serialize;
 use sqlx::FromRow;
 
@@ -12,6 +12,12 @@ struct HandlerLog {
     handler: String,
     message: Option<String>,
     created_at: NaiveDateTime,
+}
+
+#[derive(Serialize, FromRow, Debug)]
+struct HanderLogNewEntry {
+    handler: String,
+    message: String,
 }
 
 pub async fn get_health_check(app_state: web::Data<AppState>) -> impl Responder {
@@ -30,13 +36,15 @@ fn get_time_diff(start_time: &Arc<Mutex<DateTime<Utc>>>) -> Duration {
     //its immeditly corrected.
 
     let now: DateTime<Utc> = Utc::now();
-    let mut last_echo_time: MutexGuard<DateTime<Utc>> = match start_time.lock()
-    {
+    let mut last_echo_time: MutexGuard<DateTime<Utc>> = match start_time.lock() {
         Ok(guard) => guard,
         Err(poisoned) => {
             //Handle Mutex Poisoning
             let guard = poisoned.into_inner();
-            println!("[get_time_diff] >> Recovered from mutex poisoning: {:?}", *guard);
+            println!(
+                "[get_time_diff] >> Recovered from mutex poisoning: {:?}",
+                *guard
+            );
             guard
         }
     };
@@ -55,15 +63,22 @@ pub async fn get_echo_time(app_state: web::Data<AppState>) -> impl Responder {
         now,
         diff.num_seconds()
     );
-    let _ = sqlx::query!(
+    let data = HanderLogNewEntry {
+        handler: String::from("get_techo_time"),
+        message: String::from("A Query was made to /util/echo"),
+    };
+    let _ = sqlx::query_as!(
+        HanderLogNewEntry,
         "
         INSERT INTO
             handler_logs (handler, message)
         VALUES
         (
-            'get_echo_time',
-            'A Query was made to /util/echo'
-        )"
+            $1,
+            $2
+        )",
+        data.handler,
+        data.message
     )
     .execute(&app_state.pg_db)
     .await;
