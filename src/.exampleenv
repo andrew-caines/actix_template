@@ -2,4 +2,9 @@
 #Assumptions to be changed.  DB server is Postgres, DB server IP is 172.22.27.92:5432, Username (username) and Password (password) and DB is application.
 #Table Schema's are found in the models directory
 #THE .ENV file must be placed above /src directory peered with cargo.toml
+#Server IP is parsed as string and Server Port is parsed at u16.  So no quotes around port but quotes around IP. You can also use a FQDN instead of IP. However
+#server will do a quick blocking of thread as it does DNS lookup to convert into IP address.
+
 DATABASE_URL=postgresql://username:password@172.22.27.92:5432/application
+SERVER_IP="127.0.0.1"
+SERVER_PORT=80
