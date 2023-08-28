@@ -13,7 +13,6 @@ mod state;
 
 #[actix_rt::main]
 async fn main() -> io::Result<()> {
-    
     //Load enviroment varibles.
     dotenv().ok();
 
@@ -35,14 +34,22 @@ async fn main() -> io::Result<()> {
     });
 
     //Spin Up Web Server
-    println!("🚀 Server started @ 127.0.0.1:8080"); //TODO make this a constant string that is edited or comes from .env
+    let server_ip = env::var("SERVER_IP").unwrap();
+    let server_port = env::var("SERVER_PORT")
+        .unwrap()
+        .parse::<u16>()
+        .unwrap();
+
+    println!("🚀 Server started @ {:}:{:}", server_ip, server_port);
+
     HttpServer::new(move || {
         App::new()
             .app_data(app_state.clone())
             .configure(routes::auth_routes_factory)
             .configure(routes::util_routes_factory)
     })
-    .bind(("127.0.0.1", 8080))?
+    .bind((server_ip, server_port))?
     .run()
     .await
+    
 }
