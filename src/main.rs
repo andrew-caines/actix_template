@@ -1,3 +1,4 @@
+use actix_files::Files;
 use actix_web::web;
 use actix_web::{App, HttpServer};
 use chrono::Utc;
@@ -13,6 +14,7 @@ mod state;
 
 #[actix_rt::main]
 async fn main() -> io::Result<()> {
+
     //Load enviroment varibles.
     dotenv().ok();
 
@@ -40,13 +42,16 @@ async fn main() -> io::Result<()> {
         .parse::<u16>()
         .unwrap();
 
-    println!("🚀 Server started @ {:}:{:}", server_ip, server_port);
+    println!("💬 Server started @ {:}:{:}", server_ip, server_port);
 
     HttpServer::new(move || {
         App::new()
             .app_data(app_state.clone())
+            .service(Files::new("/static", "."))
+            .configure(routes::static_webserver_factory)
             .configure(routes::auth_routes_factory)
             .configure(routes::util_routes_factory)
+            .configure(routes::websocket_factory)
     })
     .bind((server_ip, server_port))?
     .run()

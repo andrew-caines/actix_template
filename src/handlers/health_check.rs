@@ -6,6 +6,7 @@ use chrono::{DateTime, Duration, NaiveDateTime, Utc};
 use serde::Serialize;
 use sqlx::FromRow;
 
+
 #[derive(Serialize, FromRow, Debug)]
 struct HandlerLog {
     log_id: i32,
@@ -27,6 +28,7 @@ pub async fn get_health_check(app_state: web::Data<AppState>) -> impl Responder 
         "{} is up, this route has been checked {} times.",
         app_state.application_name, counter
     );
+    //Fiddling with Websockets emit the health check to the echo channel of WS
     response
 }
 
@@ -64,7 +66,7 @@ pub async fn get_echo_time(app_state: web::Data<AppState>) -> impl Responder {
         diff.num_seconds()
     );
     let data = HanderLogNewEntry {
-        handler: String::from("get_techo_time"),
+        handler: String::from("get_echo_time"),
         message: String::from("A Query was made to /util/echo"),
     };
     let _ = sqlx::query_as!(
