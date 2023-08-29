@@ -48,6 +48,7 @@ async fn main() -> io::Result<()> {
         App::new()
             .app_data(app_state.clone())
             .service(Files::new("/static", "."))
+            .service(Files::new("/assets", "./static/assets"))
             .configure(routes::static_webserver_factory)
             .configure(routes::auth_routes_factory)
             .configure(routes::util_routes_factory)
