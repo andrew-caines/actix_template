@@ -20,6 +20,14 @@ GRANT ALL PRIVILEGES ON SCHEMA rust_application TO test_user;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA rust_application TO test_user;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA rust_application TO test_user;
 
+--The table used for users on this application, currently setup to auth against DB and then set JWT
+
+CREATE TABLE users (
+  id SERIAL PRIMARY KEY,
+  username VARCHAR(255),
+  password VARCHAR(255),
+);
+
 */
 
 /* Drop if already exsists */

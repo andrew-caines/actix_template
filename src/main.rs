@@ -53,6 +53,7 @@ async fn main() -> io::Result<()> {
             .configure(routes::auth_routes_factory)
             .configure(routes::util_routes_factory)
             .configure(routes::websocket_factory)
+            .configure(routes::protected_routes_factory)
     })
     .bind((server_ip, server_port))?
     .run()
