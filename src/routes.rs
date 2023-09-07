@@ -2,6 +2,7 @@ use crate::handlers::all_auth_handlers::{create_user, login, logout, protected_t
 use crate::handlers::all_util_handlers::get_health_check;
 use crate::handlers::all_websocket_handlers::ws_echo_handler;
 use crate::handlers::health_check::{get_echo_time, get_handler_logs};
+use crate::handlers::sse_handlers::{new_sse_client, test_broadcast};
 use crate::handlers::static_handler::index_handler;
 use actix_web::HttpMessage;
 use actix_web::{
@@ -39,7 +40,7 @@ async fn validator(
                 .cloned()
                 .unwrap_or_default()
                 .scope("");
-
+            println!("User supplied invalid JWT");
             Err((AuthenticationError::from(config).into(), req))
         }
     }
@@ -76,4 +77,12 @@ pub fn websocket_factory(cfg: &mut ServiceConfig) {
 
 pub fn static_webserver_factory(cfg: &mut ServiceConfig) {
     cfg.service(scope("/").route("", get().to(index_handler)));
+}
+
+pub fn sse_factory(cfg: &mut ServiceConfig) {
+    cfg.service(
+        scope("/sse")
+            .route("general", get().to(new_sse_client))
+            .route("test_message", post().to(test_broadcast)),
+    );
 }

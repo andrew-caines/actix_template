@@ -3,7 +3,7 @@
 #TODO setup SSE at a example route, so a React client can connect to it, and see emitted events (example see will just send out a interval of the size of the log_handler table Select Count(*) from handler_logs)
 
 ## To start pull down the template into a directory 
-```sh
+```console
 PS $:\> git clone https://github.com/andrew-caines/actix_template.git
 PS $:\> cd actix_template 
 PS $:\> create/edit a .env file in the root folder of application.

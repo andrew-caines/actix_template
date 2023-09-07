@@ -8,6 +8,8 @@ use state::AppState;
 use std::env;
 use std::io;
 use std::sync::{Arc, Mutex};
+
+use crate::handlers::sse_handlers::Broadcaster;
 mod handlers;
 mod routes;
 mod state;
@@ -33,6 +35,7 @@ async fn main() -> io::Result<()> {
         health_check_count: Arc::new(Mutex::new(0)),
         last_check_time: Arc::new(Mutex::new(Utc::now())),
         pg_db: db_pool.clone(),
+        sse_broadcaster: Broadcaster::create()
     });
 
     //Spin Up Web Server
@@ -52,6 +55,7 @@ async fn main() -> io::Result<()> {
             .configure(routes::static_webserver_factory)
             .configure(routes::auth_routes_factory)
             .configure(routes::util_routes_factory)
+            .configure(routes::sse_factory)
             .configure(routes::websocket_factory)
             .configure(routes::protected_routes_factory)
     })

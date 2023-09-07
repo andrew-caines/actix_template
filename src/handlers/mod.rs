@@ -2,6 +2,7 @@ pub mod auth_handlers;
 pub mod health_check;
 pub mod static_handler;
 pub mod web_socket_handlers;
+pub mod sse_handlers;
 
 pub mod prelude {
     pub use super::auth_handlers;

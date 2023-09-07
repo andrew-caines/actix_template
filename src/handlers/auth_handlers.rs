@@ -11,9 +11,11 @@ use serde::{Deserialize, Serialize};
 use sha2::Sha256;
 use sqlx::FromRow;
 
+//Anything you want to 'load' onto a users JWT you add to this TokenClaims. Should that be permission levels or other user-level settings.
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct TokenClaims {
-    id: i32,
+    pub id: i32,
+    pub username: String,
 }
 
 #[derive(Deserialize)]
@@ -69,6 +71,10 @@ pub async fn login(state: Data<AppState>, credentials: BasicAuth) -> impl Respon
     let username = credentials.user_id();
     let password = credentials.password();
 
+    //When a TokenClaims is created, this is how you embed information into the token.
+    //If you want to add information, like say values from the DB (example: post count), just make the matching
+    //Change to the TokenClaims struct, and updated in the is_valid section below.
+
     match password {
         None => HttpResponse::Unauthorized().json("Must provide username and password"),
         Some(pass) => {
@@ -91,7 +97,10 @@ pub async fn login(state: Data<AppState>, credentials: BasicAuth) -> impl Respon
                         .unwrap();
 
                     if is_valid {
-                        let claims = TokenClaims { id: user.id };
+                        let claims = TokenClaims {
+                            id: user.id,
+                            username: user.username,
+                        };
                         let token_str = claims.sign_with_key(&jwt_secret).unwrap();
                         HttpResponse::Ok().json(token_str)
                     } else {
@@ -112,6 +121,10 @@ pub async fn protected_test(
     _: Data<AppState>,
     req_user: Option<ReqData<TokenClaims>>,
 ) -> impl Responder {
-    println!("[protected_test] => req_user: {:?}", req_user.unwrap());
-    String::from("You got into /protected/protected_test")
+    //If use gets here with invalid JWT it will give them 401
+    let r = req_user.unwrap();
+    format!(
+        "Hello {} [{}] you got into /protected/protected_test",
+        r.username, r.id
+    )
 }
