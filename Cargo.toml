@@ -19,7 +19,7 @@ actix-web-lab = "0.19.1"
 
 ##Auth Dependancies
 actix-web-httpauth = "0.8.0"
-argonautica = "0.2.0"
+argon2 = "0.5.2"
 jwt = "0.16.0"
 hmac = "0.12.1"
 sha2 = "0.10.7"
@@ -39,3 +39,4 @@ sqlx = { version = "0.7.1", features = [
     "macros",
     "runtime-tokio",
 ] }
+

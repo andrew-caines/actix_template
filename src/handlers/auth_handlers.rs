@@ -4,12 +4,18 @@ use actix_web::{
     HttpResponse, Responder,
 };
 use actix_web_httpauth::extractors::basic::BasicAuth;
-use argonautica::{Hasher, Verifier};
+//use argonautica::{Hasher, Verifier};
 use hmac::{Hmac, Mac};
 use jwt::SignWithKey;
 use serde::{Deserialize, Serialize};
 use sha2::Sha256;
 use sqlx::FromRow;
+
+//
+use argon2::{
+    password_hash::{rand_core::OsRng, PasswordHasher, PasswordVerifier, SaltString},
+    Argon2,
+};
 
 //Anything you want to 'load' onto a users JWT you add to this TokenClaims. Should that be permission levels or other user-level settings.
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -39,26 +45,41 @@ pub struct AuthUser {
 
 pub async fn create_user(state: Data<AppState>, body: Json<CreateUserBody>) -> impl Responder {
     let user: CreateUserBody = body.into_inner();
-    let hash_secret = std::env::var("HASH_SECRET").expect("HASH_SECRET must be set!");
-    let mut hasher = Hasher::default();
-    let hash = hasher
-        .with_password(user.password)
-        .with_secret_key(hash_secret)
-        .hash()
-        .unwrap();
+    let hashed_password = gen_hash(user.password);
     match sqlx::query_as::<_, UserNoPassword>(
         "INSERT INTO users (username, password)
         VALUES ($1, $2)
         RETURNING id, username",
     )
     .bind(user.username)
-    .bind(hash)
+    .bind(hashed_password)
     .fetch_one(&state.pg_db)
     .await
     {
         Ok(user) => HttpResponse::Ok().json(user),
         Err(error) => HttpResponse::InternalServerError().json(format!("{:?}", error)),
     }
+}
+
+pub fn gen_hash(password: String) -> String {
+    let argon2 = Argon2::default();
+    let env_hash = std::env::var("HASH_SECRET").expect("HASH_SECRET must be set!");
+    let hash_secret = env_hash.as_bytes();
+    let hash_b64 = SaltString::encode_b64(&hash_secret).unwrap();
+    let salt = SaltString::from_b64(&hash_b64.as_str()).unwrap();
+    let hash = argon2
+        .hash_password(password.as_bytes(), &salt)
+        .unwrap()
+        .to_string();
+    hash
+}
+
+pub fn get_salt() -> SaltString {
+    let env_hash = std::env::var("HASH_SECRET").expect("HASH_SECRET must be set!");
+    let hash_secret = env_hash.as_bytes();
+    let hash_b64 = SaltString::encode_b64(&hash_secret).unwrap();
+    let salt = SaltString::from_b64(&hash_b64.as_str()).unwrap();
+    salt
 }
 
 pub async fn login(state: Data<AppState>, credentials: BasicAuth) -> impl Responder {
@@ -86,15 +107,12 @@ pub async fn login(state: Data<AppState>, credentials: BasicAuth) -> impl Respon
             .await
             {
                 Ok(user) => {
-                    let hash_secret =
-                        std::env::var("HASH_SECRET").expect("HASH_SECRET must be set!");
-                    let mut verifier = Verifier::default();
-                    let is_valid = verifier
-                        .with_hash(user.password)
-                        .with_password(pass)
-                        .with_secret_key(hash_secret)
-                        .verify()
-                        .unwrap();
+                    let argon2 = Argon2::default();
+                    let salt = get_salt();
+                    let user_password_hash = argon2.hash_password(pass.as_bytes(), &salt).unwrap();
+                    let is_valid = Argon2::default()
+                        .verify_password(pass.as_bytes(), &user_password_hash)
+                        .is_ok();
 
                     if is_valid {
                         let claims = TokenClaims {
@@ -114,6 +132,8 @@ pub async fn login(state: Data<AppState>, credentials: BasicAuth) -> impl Respon
 }
 
 pub async fn logout() -> impl Responder {
+    let salt = SaltString::generate(&mut OsRng);
+    println!("{salt}");
     String::from("Log out-STUBBED")
 }
 

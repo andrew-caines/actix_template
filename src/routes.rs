@@ -17,11 +17,12 @@ use hmac::{Hmac, Mac};
 use jwt::VerifyWithKey;
 use sha2::Sha256;
 
+//Middlewar for JWT validiation
 async fn validator(
     req: ServiceRequest,
     credentials: BearerAuth,
 ) -> Result<ServiceRequest, (Error, ServiceRequest)> {
-    println!("[validator] Credentials: {:?}", credentials.token());
+    //println!("[validator] Credentials: {:?}", credentials.token());
     let jwt_secret: String = std::env::var("JWT_SECRET").expect("JWT_SECRET must be set!");
     let key: Hmac<Sha256> = Hmac::new_from_slice(jwt_secret.as_bytes()).unwrap();
     let token_string = credentials.token();
@@ -54,6 +55,7 @@ pub fn auth_routes_factory(cfg: &mut ServiceConfig) {
             .route("logout", get().to(logout)),
     );
 }
+
 pub fn protected_routes_factory(cfg: &mut ServiceConfig) {
     let bearer_middleware = HttpAuthentication::bearer(validator);
     cfg.service(
@@ -62,6 +64,7 @@ pub fn protected_routes_factory(cfg: &mut ServiceConfig) {
             .route("test", post().to(protected_test)),
     );
 }
+
 pub fn util_routes_factory(cfg: &mut ServiceConfig) {
     cfg.service(
         scope("/util")
