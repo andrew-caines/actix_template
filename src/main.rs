@@ -31,7 +31,7 @@ async fn main() -> io::Result<()> {
 
     //Initate State
     let app_state = web::Data::new(AppState {
-        application_name: String::from("Actix Web Template DB:(Sqlx,Postgres)"),
+        application_name: String::from("Actix Web Template DB:(Sqlx,Postgres,SSE,Websockets,Auth(JWT))"),
         health_check_count: Arc::new(Mutex::new(0)),
         last_check_time: Arc::new(Mutex::new(Utc::now())),
         pg_db: db_pool.clone(),

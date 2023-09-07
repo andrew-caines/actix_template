@@ -1,7 +1,7 @@
 [package]
 name = "actix-webserver-template"
 authors = ["Andrew Caines <andrew.p.caines@gmail.com>"]
-description = "A Actix Web framework Template with Postgres,Auth,JWT,SSE and Websockets"
+description = "A Actix Web framework Template with Postgres(Sqlx),Auth,JWT,SSE and Websockets"
 readme = "README.md"
 version = "0.1.0"
 edition = "2021"
@@ -27,6 +27,7 @@ sha2 = "0.10.7"
 #Utility Dependancies
 uuid = { version = "1.4.1", features = ["v4", "serde"] }
 serde = { version = "1.0.188", features = ["derive"] }
+futures-util = "0.3.28"
 
 ##DB Dependancies
 chrono = { version = "0.4.26", features = ["serde"] }
@@ -38,6 +39,3 @@ sqlx = { version = "0.7.1", features = [
     "macros",
     "runtime-tokio",
 ] }
-futures-util = "0.3.28"
-
-
