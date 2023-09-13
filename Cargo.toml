@@ -16,6 +16,7 @@ actix-rt = "2.9.0"
 actix-web = "4.3.1"
 actix-web-actors = "4.2.0"
 actix-web-lab = "0.19.1"
+actix-cors = "0.6.4"
 
 ##Auth Dependancies
 actix-web-httpauth = "0.8.0"
@@ -39,4 +40,3 @@ sqlx = { version = "0.7.1", features = [
     "macros",
     "runtime-tokio",
 ] }
-

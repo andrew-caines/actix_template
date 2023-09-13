@@ -1,0 +1,9 @@
+.filter-softblue {
+  filter: invert(80%) sepia(10%) saturate(1467%) hue-rotate(171deg)
+    brightness(94%) contrast(99%);
+}
+
+.filter-indigo {
+  filter: invert(19%) sepia(79%) saturate(634%) hue-rotate(179deg)
+    brightness(96%) contrast(95%);
+}

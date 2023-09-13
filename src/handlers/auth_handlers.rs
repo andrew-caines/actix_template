@@ -3,8 +3,8 @@ use actix_web::{
     web::{Data, Json, ReqData},
     HttpResponse, Responder,
 };
+
 use actix_web_httpauth::extractors::basic::BasicAuth;
-//use argonautica::{Hasher, Verifier};
 use hmac::{Hmac, Mac};
 use jwt::SignWithKey;
 use serde::{Deserialize, Serialize};

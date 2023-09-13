@@ -4,6 +4,7 @@ use crate::handlers::all_websocket_handlers::ws_echo_handler;
 use crate::handlers::health_check::{get_echo_time, get_handler_logs};
 use crate::handlers::sse_handlers::{new_sse_client, test_broadcast};
 use crate::handlers::static_handler::index_handler;
+use actix_cors::Cors;
 use actix_web::HttpMessage;
 use actix_web::{
     dev::ServiceRequest,
@@ -48,8 +49,11 @@ async fn validator(
 }
 
 pub fn auth_routes_factory(cfg: &mut ServiceConfig) {
+    //FOR DEV ONLY, REMOVE CORS STUFF FOR PRODUCTION OR UPDATE TO BE CORRECT
+    let cors = Cors::permissive();
     cfg.service(
         scope("/v1/auth")
+            .wrap(cors)
             .route("create", post().to(create_user))
             .route("login", post().to(login)) //This route is where you login and get JWT
             .route("logout", get().to(logout)),

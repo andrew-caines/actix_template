@@ -7,6 +7,9 @@ pub mod sse_handlers;
 pub mod prelude {
     pub use super::auth_handlers;
     pub use super::health_check;
+    pub use super::static_handler;
+    pub use super::web_socket_handlers;
+    pub use super::sse_handlers;
 }
 
 pub mod all_auth_handlers {
