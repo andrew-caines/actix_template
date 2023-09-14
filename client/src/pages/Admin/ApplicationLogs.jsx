@@ -1,5 +1,5 @@
 import { useLoaderData } from "react-router-dom";
-import { Table } from "@mantine/core";
+import { Table,Pagination } from "@mantine/core";
 
 export default function ApplicationLog(props) {
   const data = useLoaderData();
@@ -15,7 +15,7 @@ export default function ApplicationLog(props) {
     );
   });
   return (
-    <Table verticalSpacing="xs" fontSize="md">
+    <Table verticalSpacing="xs" striped fontSize="md" style={{maxHeight:"85vh",height:"85vh"}}>
       <thead>
         <tr>
           <th>ID</th>
@@ -25,6 +25,9 @@ export default function ApplicationLog(props) {
         </tr>
       </thead>
       <tbody>{rows}</tbody>
+      <tfoot>
+        <Pagination />
+      </tfoot>
     </Table>
   );
 }

@@ -27,7 +27,7 @@ function Root() {
           backgroundColor:
             theme.colorScheme === "dark"
               ? theme.colors.dark[8]
-              : theme.colors.gray[0],
+              : theme.colors.nicewhite[5],
         },
       })}
     >

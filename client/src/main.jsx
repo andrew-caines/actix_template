@@ -9,6 +9,8 @@ import {
   Route,
 } from "react-router-dom";
 import "./index.css";
+//Custom Colors
+import custom_colors from "./custom_colors.json";
 
 //Pages
 import Index from "./pages/Index.jsx";
@@ -56,7 +58,7 @@ const router = createBrowserRouter(
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <StateProvider>
-      <MantineProvider withGlobalStyles withNormalizeCSS>
+      <MantineProvider withGlobalStyles withNormalizeCSS theme={{colors:custom_colors}}>
         <RouterProvider router={router} />
       </MantineProvider>
     </StateProvider>
