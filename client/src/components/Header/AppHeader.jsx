@@ -10,7 +10,6 @@ export default function AppHeader(props) {
   const { state, login_user, logout_user } = useContext(StateContext);
   const [opened, { open, close }] = useDisclosure(false);
 
-  console.log(`<AppHeader> [state.isLoggedIn] ${state.isLoggedIn}`);
   return (
     <Header height={60} p="xs">
       <Group position="apart">

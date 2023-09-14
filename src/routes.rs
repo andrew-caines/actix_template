@@ -70,8 +70,11 @@ pub fn protected_routes_factory(cfg: &mut ServiceConfig) {
 }
 
 pub fn util_routes_factory(cfg: &mut ServiceConfig) {
+    //FOR DEV ONLY, REMOVE CORS STUFF FOR PRODUCTION OR UPDATE TO BE CORRECT
+    let cors = Cors::permissive();
     cfg.service(
         scope("/util")
+            .wrap(cors)
             .route("health", get().to(get_health_check))
             .route("echo", get().to(get_echo_time))
             .route("logs", get().to(get_handler_logs)),

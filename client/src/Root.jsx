@@ -5,6 +5,7 @@ import SideNavBar from "./components/Navbar/AppSideNavBar";
 import AppHeader from "./components/Header/AppHeader";
 import AppFooter from "./components/Footer/AppFooter";
 import SideNavToggler from "./components/Navbar/SideNavToggle";
+
 function Root() {
   const [sideMenuOpened, setToggleSideMenu] = useState(true);
 
@@ -20,7 +21,7 @@ function Root() {
       }
       header={<AppHeader />}
       footer={<AppFooter />}
-      style={{height:"90vh"}}
+      style={{ height: "90vh" }}
       styles={(theme) => ({
         main: {
           backgroundColor:
@@ -30,7 +31,7 @@ function Root() {
         },
       })}
     >
-      <Container>
+      <Container style={{minWidth:"100%"}}>
         <Outlet />
       </Container>
     </AppShell>
@@ -38,3 +39,5 @@ function Root() {
 }
 
 export default Root;
+
+//

@@ -16,7 +16,7 @@ export const LoginUser = async (username, password) => {
     return result;
   } catch (err) {
     console.log(`[Login] Got Error. ${JSON.stringify(err)}`);
-    return { success: false, message: JSON.stringify(err) };
+    return { success: false, message: "Server Error Logging in." };
   }
 };
 

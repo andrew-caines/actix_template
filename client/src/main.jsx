@@ -1,25 +1,41 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import Root from "./Root.jsx";
-import "./index.css";
 import { MantineProvider } from "@mantine/core";
 import { StateProvider } from "./context/state.jsx";
+import {
+  createRoutesFromElements,
+  createBrowserRouter,
+  RouterProvider,
+  Route,
+} from "react-router-dom";
+import "./index.css";
 
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-/*
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <div>Hello world!</div>,
-  },
-]);
-<RouterProvider router={router} />
-*/
+//Pages
+import Index from "./pages/Index.jsx";
+import Root from "./Root.jsx";
+import ApplicationLog, {
+  loader as app_log_loader,
+} from "./pages/Admin/ApplicationLogs.jsx";
+
+const router = createBrowserRouter(
+  createRoutesFromElements(
+    <Route path="/" element={<Root />}>
+      <Route index element={<Index />} />
+      <Route
+        path="/applicationlogs"
+        element={<ApplicationLog />}
+        loader={app_log_loader}
+        errorElement={<div>OhOh</div>}
+      />
+    </Route>
+  )
+);
+
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <StateProvider>
       <MantineProvider withGlobalStyles withNormalizeCSS>
-        <Root />
+        <RouterProvider router={router} />
       </MantineProvider>
     </StateProvider>
   </React.StrictMode>
