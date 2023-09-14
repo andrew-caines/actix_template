@@ -37,7 +37,7 @@ const router = createBrowserRouter(
         loader={app_details_loader}
         errorElement={<GeneralError />}
       />
-       <Route
+      <Route
         path="/application_test"
         element={<ApplicationTest />}
         loader={app_test_loader}
@@ -49,7 +49,7 @@ const router = createBrowserRouter(
         loader={app_log_loader}
         errorElement={<GeneralError />}
       />
-     
+
       <Route path="*" element={<Error404 />} />
     </Route>
   )
@@ -58,7 +58,11 @@ const router = createBrowserRouter(
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <StateProvider>
-      <MantineProvider withGlobalStyles withNormalizeCSS theme={{colors:custom_colors}}>
+      <MantineProvider
+        withGlobalStyles
+        withNormalizeCSS
+        theme={{ colors: custom_colors }}
+      >
         <RouterProvider router={router} />
       </MantineProvider>
     </StateProvider>

@@ -1,11 +1,9 @@
-use std::sync::{Arc, Mutex, MutexGuard};
-
 use crate::state::AppState;
 use actix_web::{web, HttpResponse, Responder};
 use chrono::{DateTime, Duration, NaiveDateTime, Utc};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
-
+use std::sync::{Arc, Mutex, MutexGuard};
 
 #[derive(Serialize, FromRow, Debug)]
 struct HandlerLog {
@@ -14,11 +12,21 @@ struct HandlerLog {
     message: Option<String>,
     created_at: NaiveDateTime,
 }
-
+#[derive(Serialize, Debug)]
+struct HandlerLogsPlusCount {
+    count: i64,
+    logs: Vec<HandlerLog>,
+}
 #[derive(Serialize, FromRow, Debug)]
 struct HanderLogNewEntry {
     handler: String,
     message: String,
+}
+
+#[derive(Deserialize)]
+pub struct LogRequestRequiredParams {
+    offset: i32,
+    limit: i32,
 }
 
 pub async fn get_health_check(app_state: web::Data<AppState>) -> impl Responder {
@@ -87,11 +95,31 @@ pub async fn get_echo_time(app_state: web::Data<AppState>) -> impl Responder {
     response
 }
 
-pub async fn get_handler_logs(app_state: web::Data<AppState>) -> impl Responder {
+pub async fn get_handler_logs(
+    app_state: web::Data<AppState>,
+    query: web::Query<LogRequestRequiredParams>,
+) -> impl Responder {
     //This route will get all entries in the handler_logs table and display them.
-    let logs = sqlx::query_as::<_, HandlerLog>("SELECT * FROM handler_logs")
-        .fetch_all(&app_state.pg_db)
+    //path: OFFSET,LIMIT
+    println!(
+        "[get_handler_logs]> GET Params: limit:{:?}  offset:{:?}",
+        query.limit,query.offset
+    );
+    let logs = sqlx::query_as::<_, HandlerLog>(
+        "SELECT log_id,handler,message,created_at FROM handler_logs LIMIT $1 OFFSET $2",
+    )
+    .bind(query.limit)
+    .bind(query.offset)
+    .fetch_all(&app_state.pg_db)
+    .await
+    .unwrap();
+    let count: (i64,) = sqlx::query_as("SELECT COUNT(log_id) FROM handler_logs")
+        .fetch_one(&app_state.pg_db)
         .await
         .unwrap();
-    HttpResponse::Ok().json(logs)
+    let result = HandlerLogsPlusCount {
+        count: count.0,
+        logs: logs,
+    };
+    HttpResponse::Ok().json(result)
 }

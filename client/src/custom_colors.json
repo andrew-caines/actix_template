@@ -1,5 +1,52 @@
 {
-    "niceblue":["#337BFF","#4D8CFF","#669CFF","#80ADFF","#99BDFF","#B3CEFF","#CCDEFF","#E6EFFF"],
-    "nicewhite":["#F3F9FC","#F5FAFC","#F6FBFD","#F8FCFD","#F9FCFD","#FBFDFE","#FCFEFE","#FEFEFF"]
-
+  "niceblue": [
+    "#337BFF",
+    "#4D8CFF",
+    "#669CFF",
+    "#80ADFF",
+    "#99BDFF",
+    "#B3CEFF",
+    "#CCDEFF",
+    "#E6EFFF"
+  ],
+  "nicewhite": [
+    "#F3F9FC",
+    "#F5FAFC",
+    "#F6FBFD",
+    "#F8FCFD",
+    "#F9FCFD",
+    "#FBFDFE",
+    "#FCFEFE",
+    "#FEFEFF"
+  ],
+  "ofxbase": [
+    "#FF8733",
+    "#FF964D",
+    "#FFA566",
+    "#FFB480",
+    "#FFC399",
+    "#FFD2B3",
+    "#FFE1CC",
+    "#FFF0E6"
+  ],
+  "ofxlight": [
+    "#F49739",
+    "#F5A452",
+    "#F7B16B",
+    "#F8BE84",
+    "#FBD8B5",
+    "#FBFDFE",
+    "#FCE5CE",
+    "#FEF2E6"
+  ],
+  "ofxdark": [
+    "#DA7E20",
+    "#CF7E2C",
+    "#C47E38",
+    "#B97F44",
+    "#AD7F50",
+    "#A27F5C",
+    "#977F68",
+    "#8B8074"
+  ]
 }

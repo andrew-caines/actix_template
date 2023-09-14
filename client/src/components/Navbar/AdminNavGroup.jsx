@@ -31,7 +31,7 @@ export default function (props) {
             <NavLink
               label="Application Logs"
               icon={<GoLog size={16} color="#B18C65" />}
-              onClick={() => navigate("/application_logs")}
+              onClick={() => navigate("/application_logs?limit=25&offset=0")}
             />
           </Accordion.Panel>
         </Accordion.Item>
