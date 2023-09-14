@@ -1,5 +1,5 @@
 import { useLoaderData } from "react-router-dom";
-import { Container, Table } from "@mantine/core";
+import { Table } from "@mantine/core";
 
 export default function ApplicationLog(props) {
   const data = useLoaderData();
@@ -10,24 +10,22 @@ export default function ApplicationLog(props) {
         <td>{item.log_id}</td>
         <td>{item.handler}</td>
         <td>{item.message}</td>
-        <td>{new Date(item.created_at).toLocaleDateString("en-us")}</td>
+        <td>{new Date(item.created_at).toUTCString("dd,Mmm,yy hh:mm:ss ")}</td>
       </tr>
     );
   });
   return (
-    <Container style={{ width: "100%" }}>
-      <Table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Handler</th>
-            <th>Message</th>
-            <th>Date/Time</th>
-          </tr>
-        </thead>
-        <tbody>{rows}</tbody>
-      </Table>
-    </Container>
+    <Table verticalSpacing="xs" fontSize="md">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Handler</th>
+          <th>Message</th>
+          <th>Date/Time</th>
+        </tr>
+      </thead>
+      <tbody>{rows}</tbody>
+    </Table>
   );
 }
 

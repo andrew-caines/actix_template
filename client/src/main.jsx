@@ -16,17 +16,26 @@ import Root from "./Root.jsx";
 import ApplicationLog, {
   loader as app_log_loader,
 } from "./pages/Admin/ApplicationLogs.jsx";
+import GeneralError from "./pages/Error/GeneralError.jsx";
+import Error404 from "./pages/Error/Error404.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<Root />}>
       <Route index element={<Index />} />
       <Route
-        path="/applicationlogs"
+        path="/application_logs"
         element={<ApplicationLog />}
         loader={app_log_loader}
-        errorElement={<div>OhOh</div>}
+        errorElement={<GeneralError />}
       />
+      <Route
+        path="/application_test"
+        element={<ApplicationLog />}
+        loader={app_log_loader}
+        errorElement={<GeneralError />}
+      />
+      <Route path='*' element={<Error404 />}/>
     </Route>
   )
 );

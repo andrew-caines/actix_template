@@ -24,11 +24,12 @@ export default function (props) {
             <NavLink
               label="Application Test"
               icon={<BiTestTube size={16} color="#0067A5" />}
+              onClick={() => navigate("/application_test")}
             />
             <NavLink
               label="Application Logs"
               icon={<GoLog size={16} color="#B18C65" />}
-              onClick={() => navigate("/applicationlogs")}
+              onClick={() => navigate("/application_logs")}
             />
           </Accordion.Panel>
         </Accordion.Item>

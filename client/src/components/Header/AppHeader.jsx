@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { Header, Group, Text, Button } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
+import { useNavigate } from "react-router-dom";
 import { StateContext } from "../../context/state";
 import LoginModal from "../Auth/LoginModal";
 import Logo from "../../assets/Logo2.svg";
@@ -9,11 +10,12 @@ import "./AppHeader.css";
 export default function AppHeader(props) {
   const { state, login_user, logout_user } = useContext(StateContext);
   const [opened, { open, close }] = useDisclosure(false);
+  const navigate = useNavigate();
 
   return (
     <Header height={60} p="xs">
       <Group position="apart">
-        <Group>
+        <Group onClick={() => navigate("/")}>
           <img
             src={Logo}
             className="filter-indigo"
@@ -21,6 +23,7 @@ export default function AppHeader(props) {
             height="32px"
             width="32px"
             style={{ color: "red" }}
+            
           />
           <Text fz="xl" fw={600}>
             APP NAME
