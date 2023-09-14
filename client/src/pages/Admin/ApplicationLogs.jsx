@@ -3,7 +3,7 @@ import { Table } from "@mantine/core";
 
 export default function ApplicationLog(props) {
   const data = useLoaderData();
-  //log_id, handler, message, created_at
+  
   const rows = data.map((item) => {
     return (
       <tr key={item.log_id}>

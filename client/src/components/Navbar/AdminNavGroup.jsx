@@ -18,13 +18,14 @@ export default function (props) {
           </Accordion.Control>
           <Accordion.Panel>
             <NavLink
-              label="Application Health"
+              label="Application Details"
               icon={<RiHealthBookLine size={16} color="red" />}
+              onClick={() => navigate("/application_details")}
             />
             <NavLink
               label="Application Test"
               icon={<BiTestTube size={16} color="#0067A5" />}
-              onClick={() => navigate("/application_test")}
+              
             />
             <NavLink
               label="Application Logs"

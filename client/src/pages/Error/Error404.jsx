@@ -4,7 +4,7 @@ import { useRouteError } from "react-router-dom";
 
 export default function Error404(props) {
   let error = useRouteError();
-  console.log(error);
+  
   return (
     <>
       <Alert
@@ -16,7 +16,7 @@ export default function Error404(props) {
       >
         You attempted to Navigate to a Page that doesn't exist! Please navigate
         from menu options selectable on the LEFT side of the screen!
-        {error}
+        {error?.message}
       </Alert>
       <div className="arrow">
         <span></span>

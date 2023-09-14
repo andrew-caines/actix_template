@@ -16,6 +16,9 @@ import Root from "./Root.jsx";
 import ApplicationLog, {
   loader as app_log_loader,
 } from "./pages/Admin/ApplicationLogs.jsx";
+import ApplicationDetails, {
+  loader as app_details_loader,
+} from "./pages/Admin/ApplicationDetails.jsx";
 import GeneralError from "./pages/Error/GeneralError.jsx";
 import Error404 from "./pages/Error/Error404.jsx";
 
@@ -30,12 +33,12 @@ const router = createBrowserRouter(
         errorElement={<GeneralError />}
       />
       <Route
-        path="/application_test"
-        element={<ApplicationLog />}
-        loader={app_log_loader}
+        path="/application_details"
+        element={<ApplicationDetails />}
+        loader={app_details_loader}
         errorElement={<GeneralError />}
       />
-      <Route path='*' element={<Error404 />}/>
+      <Route path="*" element={<Error404 />} />
     </Route>
   )
 );
