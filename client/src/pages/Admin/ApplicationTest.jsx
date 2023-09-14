@@ -1,13 +1,14 @@
 import { useLoaderData } from "react-router-dom";
 import { Alert, Container } from "@mantine/core";
-import { TbMessage2Heart } from "react-icons/tb";
-export default function ApplicationDetails(props) {
+import { GiEchoRipples } from "react-icons/gi";
+
+export default function ApplicationTest(props) {
   const data = useLoaderData();
   return (
     <Container>
       <Alert
-        icon={<TbMessage2Heart size={24} />}
-        title="Server Details"
+        icon={<GiEchoRipples size={24}/>}
+        title="Server Echo Test"
         color="blue"
         radius="xl"
       >
@@ -19,12 +20,12 @@ export default function ApplicationDetails(props) {
 
 export async function loader() {
   const BASE_URL = "http://localhost";
-  const DETAILS_URL = "/util/health";
+  const ECHO_URL = "/util/echo";
   //localhost/util/logs
   const requestOptions = {
     method: "GET",
-    headers: { "Content-type": "application/json" },
+    headers: { "Content-type": "application/text" },
   };
-  const response = await fetch(`${BASE_URL}${DETAILS_URL}`, requestOptions);
+  const response = await fetch(`${BASE_URL}${ECHO_URL}`, requestOptions);
   return response;
 }

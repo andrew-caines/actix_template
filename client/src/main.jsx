@@ -19,6 +19,9 @@ import ApplicationLog, {
 import ApplicationDetails, {
   loader as app_details_loader,
 } from "./pages/Admin/ApplicationDetails.jsx";
+import ApplicationTest, {
+  loader as app_test_loader,
+} from "./pages/Admin/ApplicationTest.jsx";
 import GeneralError from "./pages/Error/GeneralError.jsx";
 import Error404 from "./pages/Error/Error404.jsx";
 
@@ -27,17 +30,24 @@ const router = createBrowserRouter(
     <Route path="/" element={<Root />}>
       <Route index element={<Index />} />
       <Route
-        path="/application_logs"
-        element={<ApplicationLog />}
-        loader={app_log_loader}
-        errorElement={<GeneralError />}
-      />
-      <Route
         path="/application_details"
         element={<ApplicationDetails />}
         loader={app_details_loader}
         errorElement={<GeneralError />}
       />
+       <Route
+        path="/application_test"
+        element={<ApplicationTest />}
+        loader={app_test_loader}
+        errorElement={<GeneralError />}
+      />
+      <Route
+        path="/application_logs"
+        element={<ApplicationLog />}
+        loader={app_log_loader}
+        errorElement={<GeneralError />}
+      />
+     
       <Route path="*" element={<Error404 />} />
     </Route>
   )

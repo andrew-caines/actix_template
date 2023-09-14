@@ -25,6 +25,7 @@ export default function (props) {
             <NavLink
               label="Application Test"
               icon={<BiTestTube size={16} color="#0067A5" />}
+              onClick={() => navigate("/application_test")}
               
             />
             <NavLink
