@@ -9,12 +9,22 @@ import {
   Route,
 } from "react-router-dom";
 import "./index.css";
+
+//Mantine Base CSS
+import "@mantine/core/styles.css";
+
 //Custom Colors
 import custom_colors from "./custom_colors.json";
 
 //Pages
 import Index from "./pages/Index.jsx";
 import Root from "./Root.jsx";
+
+//Common Pages
+import GeneralError from "./pages/Error/GeneralError.jsx";
+import Error404 from "./pages/Error/Error404.jsx";
+
+//Admin Section Pages
 import ApplicationLog, {
   loader as app_log_loader,
 } from "./pages/Admin/ApplicationLogs.jsx";
@@ -24,8 +34,10 @@ import ApplicationDetails, {
 import ApplicationTest, {
   loader as app_test_loader,
 } from "./pages/Admin/ApplicationTest.jsx";
-import GeneralError from "./pages/Error/GeneralError.jsx";
-import Error404 from "./pages/Error/Error404.jsx";
+
+//SSE Section Pages
+import SendToSSEStream from "./pages/SSE/SendToSSEStream.jsx";
+import WatchSSEStream from "./pages/SSE/WatchSSEStream.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -49,7 +61,16 @@ const router = createBrowserRouter(
         loader={app_log_loader}
         errorElement={<GeneralError />}
       />
-
+      <Route
+        path="/sse/general"
+        element={<WatchSSEStream />}
+        errorElement={<GeneralError />}
+      />
+      <Route
+        path="/sse/sendToAll"
+        element={<SendToSSEStream />}
+        errorElement={<GeneralError />}
+      />
       <Route path="*" element={<Error404 />} />
     </Route>
   )
@@ -62,6 +83,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         withGlobalStyles
         withNormalizeCSS
         theme={{ colors: custom_colors }}
+        defaultColorScheme="dark"
       >
         <RouterProvider router={router} />
       </MantineProvider>

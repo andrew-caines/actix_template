@@ -90,8 +90,10 @@ pub fn static_webserver_factory(cfg: &mut ServiceConfig) {
 }
 
 pub fn sse_factory(cfg: &mut ServiceConfig) {
+    let cors = Cors::permissive();
     cfg.service(
         scope("/sse")
+            .wrap(cors)
             .route("general", get().to(new_sse_client))
             .route("test_message", post().to(test_broadcast)),
     );

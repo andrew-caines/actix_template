@@ -7,3 +7,8 @@
   filter: invert(19%) sepia(79%) saturate(634%) hue-rotate(179deg)
     brightness(96%) contrast(95%);
 }
+
+.filter-ofxbase {
+  filter: invert(71%) sepia(92%) saturate(2902%) hue-rotate(336deg)
+    brightness(101%) contrast(101%);
+}

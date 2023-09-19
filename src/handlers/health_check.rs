@@ -36,7 +36,11 @@ pub async fn get_health_check(app_state: web::Data<AppState>) -> impl Responder 
         "{} is up, this route has been checked {} times.",
         app_state.application_name, counter
     );
-    //Fiddling with Websockets emit the health check to the echo channel of WS
+    //Emit this acction to all connected users of /sse/general
+    app_state
+        .sse_broadcaster
+        .broadcast("A user has checked the Health Route")
+        .await;
     response
 }
 
@@ -92,6 +96,11 @@ pub async fn get_echo_time(app_state: web::Data<AppState>) -> impl Responder {
     )
     .execute(&app_state.pg_db)
     .await;
+    //Emit this acction to all connected users of /sse/general
+    app_state
+        .sse_broadcaster
+        .broadcast("A user has checked the Serve Echo Test Route")
+        .await;
     response
 }
 
@@ -103,7 +112,7 @@ pub async fn get_handler_logs(
     //path: OFFSET,LIMIT
     println!(
         "[get_handler_logs]> GET Params: limit:{:?}  offset:{:?}",
-        query.limit,query.offset
+        query.limit, query.offset
     );
     let logs = sqlx::query_as::<_, HandlerLog>(
         "SELECT log_id,handler,message,created_at FROM handler_logs LIMIT $1 OFFSET $2",

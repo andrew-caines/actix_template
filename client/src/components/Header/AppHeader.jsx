@@ -1,43 +1,44 @@
-import { useContext } from "react";
-import { Header, Group, Text, Button } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { useContext, useState } from "react";
+import { Group, Text, Button, Burger } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 import { StateContext } from "../../context/state";
+
 import LoginModal from "../Auth/LoginModal";
 import Logo from "../../assets/Logo2.svg";
 import "./AppHeader.css";
 
-export default function AppHeader(props) {
+export default function AppHeader({ opened, toggle }) {
   const { state, login_user, logout_user } = useContext(StateContext);
-  const [opened, { open, close }] = useDisclosure(false);
+  const [loginModalOpen, setLoginModalState] = useState(false);
   const navigate = useNavigate();
 
   return (
-    <Header height={60} p="xs">
-      <Group position="apart">
-        <Group onClick={() => navigate("/")}>
-          <img
-            src={Logo}
-            className="filter-indigo"
-            alt="Placeholder Logo"
-            height="32px"
-            width="32px"
-            style={{ color: "red" }}
-            
-          />
-          <Text fz="xl" fw={600}>
-            APP NAME
-          </Text>
-        </Group>
-        <Group position="right">
-          {state.isLoggedIn ? (
-            <Button onClick={() => logout_user()}>Logout</Button>
-          ) : (
-            <Button onClick={() => open()}>Login</Button>
-          )}
-        </Group>
+    <Group h="100%" px="md" justify="space-between">
+      <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
+      <Group onClick={() => navigate("/")}>
+        <img
+          src={Logo}
+          alt="Placeholder Logo"
+          className="filter-ofxbase"
+          height="32px"
+          width="32px"
+        />
+        <Text fz="xl" fw={600}>
+          IT-DASH
+        </Text>
       </Group>
-      <LoginModal opened={opened} close={close} login={login_user} />
-    </Header>
+      <Group justify="flex-end">
+        {state.isLoggedIn ? (
+          <Button onClick={() => logout_user()}>Logout</Button>
+        ) : (
+          <Button onClick={() => setLoginModalState(true)}>Login</Button>
+        )}
+      </Group>
+      <LoginModal
+        opened={loginModalOpen}
+        close={setLoginModalState}
+        login={login_user}
+      />
+    </Group>
   );
 }

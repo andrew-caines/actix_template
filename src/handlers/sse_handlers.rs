@@ -43,11 +43,11 @@ impl Broadcaster {
     }
 
     pub async fn new_client(&self) -> Sse<ChannelStream> {
-        println!("starting creation");
+        println!("New Connection to SSE Endpoint.");
         let (tx, rx) = sse::channel(10);
 
         tx.send(sse::Data::new("connected")).await.unwrap();
-        println!("creating new clients success {:?}", tx);
+        //println!("creating new clients success {:?}", tx);
         self.inner.lock().unwrap().clients.push(tx);
         rx
     }
@@ -88,5 +88,5 @@ pub async fn new_sse_client(state: Data<AppState>) -> impl Responder {
 pub async fn test_broadcast(state: Data<AppState>, msg: Json<TestMessage>) -> impl Responder {
     println!("Got message: {:?}", &msg);
     state.sse_broadcaster.broadcast(&msg.message).await;
-    String::from("Message sent.")
+    String::from("Success")
 }
