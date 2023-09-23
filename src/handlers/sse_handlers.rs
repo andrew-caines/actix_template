@@ -86,7 +86,7 @@ pub async fn new_sse_client(state: Data<AppState>) -> impl Responder {
 }
 
 pub async fn test_broadcast(state: Data<AppState>, msg: Json<TestMessage>) -> impl Responder {
-    println!("Got message: {:?}", &msg);
+    println!("Got message: {:?}", &msg.message);
     state.sse_broadcaster.broadcast(&msg.message).await;
     String::from("Success")
 }

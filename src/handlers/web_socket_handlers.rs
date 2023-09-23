@@ -1,7 +1,16 @@
-use actix::{Actor, ActorContext, AsyncContext, StreamHandler};
-use actix_web::{web, Error, HttpRequest, HttpResponse};
+use super::messages::{ClientActorMessage, Connect, Disconnect, WsMessage};
+use crate::{handlers::lobby::Lobby, state::AppState};
+use actix::{
+    fut, prelude::ContextFutureSpawner, Actor, ActorContext, ActorFutureExt, Addr, AsyncContext,
+    Handler, Running, StreamHandler, WrapFuture,
+};
+use actix_web::{
+    web::{self, Data},
+    Error, HttpRequest, HttpResponse,
+};
 use actix_web_actors::ws;
 use std::time::{Duration, Instant};
+use uuid::Uuid;
 
 /// How often heartbeat pings are sent
 const HEARTBEAT_INTERVAL: Duration = Duration::from_secs(5);
@@ -10,6 +19,72 @@ const CLIENT_TIMEOUT: Duration = Duration::from_secs(10);
 //Channels or Websocket scopes
 pub struct EchoWs {
     hb: Instant,
+}
+
+pub struct ItChannelWs {
+    user_socket_id: Uuid,
+    lobby_address: Addr<Lobby>,
+    hb: Instant,
+    it_channel_id: Uuid,
+}
+
+impl ItChannelWs {
+    pub fn new(it_channel: Uuid, lobby: Addr<Lobby>) -> Self {
+        Self {
+            user_socket_id: Uuid::new_v4(),
+            lobby_address: lobby,
+            hb: Instant::now(),
+            it_channel_id: it_channel,
+        }
+    }
+
+    fn start_heartbeat(&self, ctx: &mut <Self as Actor>::Context) {
+        ctx.run_interval(HEARTBEAT_INTERVAL, |act, ctx| {
+            // check client heartbeats
+            if Instant::now().duration_since(act.hb) > CLIENT_TIMEOUT {
+                // heartbeat timed out
+                println!("Websocket client for IT WS channel has disconnected.");
+                // stop actor
+                ctx.stop();
+                // don't try to send a ping
+                return;
+            }
+            ctx.ping(b"PING");
+        });
+    }
+}
+
+impl Actor for ItChannelWs {
+    type Context = ws::WebsocketContext<Self>;
+
+    fn started(&mut self, ctx: &mut Self::Context) {
+        self.start_heartbeat(ctx);
+
+        let addr = ctx.address();
+        self.lobby_address
+            .send(Connect {
+                addr: addr.recipient(),
+                lobby_id: self.it_channel_id,
+                self_id: self.user_socket_id,
+            })
+            .into_actor(self)
+            .then(|res, _, ctx| {
+                match res {
+                    Ok(_res) => (),
+                    _ => ctx.stop(),
+                }
+                fut::ready(())
+            })
+            .wait(ctx);
+    }
+
+    fn stopping(&mut self, _: &mut Self::Context) -> Running {
+        self.lobby_address.do_send(Disconnect {
+            id: self.user_socket_id,
+            room_id: self.it_channel_id,
+        });
+        Running::Stop
+    }
 }
 
 impl EchoWs {
@@ -41,6 +116,45 @@ impl Actor for EchoWs {
     }
 }
 
+//StreamHandler for ItChannelWS
+impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for ItChannelWs {
+    fn handle(&mut self, msg: Result<ws::Message, ws::ProtocolError>, ctx: &mut Self::Context) {
+        match msg {
+            Ok(ws::Message::Ping(msg)) => {
+                self.hb = Instant::now();
+                ctx.pong(&msg);
+            }
+            Ok(ws::Message::Pong(_)) => {
+                self.hb = Instant::now();
+            }
+            Ok(ws::Message::Binary(bin)) => ctx.binary(bin),
+            Ok(ws::Message::Close(reason)) => {
+                ctx.close(reason);
+                ctx.stop();
+            }
+            Ok(ws::Message::Continuation(_)) => {
+                ctx.stop();
+            }
+            Ok(ws::Message::Nop) => (),
+            Ok(ws::Message::Text(text)) => self.lobby_address.do_send(ClientActorMessage {
+                id: self.user_socket_id,
+                msg: text.to_string(),
+                room_id: self.it_channel_id,
+            }),
+            Err(e) => panic!("{:?}", e),
+        }
+    }
+}
+
+//Handlder for ws:Message(msg) for ItChannelWS
+impl Handler<WsMessage> for ItChannelWs {
+    type Result = ();
+    fn handle(&mut self, msg: WsMessage, ctx: &mut Self::Context) -> Self::Result {
+        //This is where you can massage or modify the incomming message. Maybe parse it, or precondition it before relaying to client.
+        ctx.text(msg.0)
+    }
+}
+
 //Handler for ws::Message (msg)
 impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for EchoWs {
     fn handle(&mut self, msg: Result<ws::Message, ws::ProtocolError>, ctx: &mut Self::Context) {
@@ -60,6 +174,7 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for EchoWs {
             }
             Ok(ws::Message::Binary(bin)) => ctx.binary(bin),
             Ok(ws::Message::Close(reason)) => {
+                println!("WS Client Disconnected: {:#?}", &reason);
                 ctx.close(reason);
                 ctx.stop();
             }
@@ -77,4 +192,18 @@ pub async fn ws_echo_handler(
     //resp is now the Actor, now push that somewhere that can be tracked, so messages can be sent to it.
     println!("{:?}", resp);
     resp
+}
+
+pub async fn ws_it_handler(
+    req: HttpRequest,
+    stream: web::Payload,
+    state: Data<AppState>,
+) -> Result<HttpResponse, Error> {
+    //Hard Coded IT Channel UUID:588b3104-c06c-4a1a-aad2-6f820309d1a0
+    //TODO make it so fixed channels do not require UUID
+    
+    let ws = ItChannelWs::new(Uuid::parse_str("588b3104-c06c-4a1a-aad2-6f820309d1a0").unwrap(), state.lobby.clone());
+    println!("{:?}",&ws.it_channel_id);
+    let resp = ws::start(ws, &req, stream)?;
+    Ok(resp)
 }

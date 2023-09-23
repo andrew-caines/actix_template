@@ -83,6 +83,7 @@ pub fn get_salt() -> SaltString {
 }
 
 pub async fn login(state: Data<AppState>, credentials: BasicAuth) -> impl Responder {
+    
     let jwt_secret: Hmac<Sha256> = Hmac::new_from_slice(
         std::env::var("JWT_SECRET")
             .expect("JWT_SECRET must be set!")
