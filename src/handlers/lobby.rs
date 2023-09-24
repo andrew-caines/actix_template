@@ -7,12 +7,6 @@ use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
 
 #[derive(Serialize)]
-enum WsMessageTypes {
-    NewUserConnected,
-    UserDisconnected,
-}
-
-#[derive(Serialize)]
 struct ConnectionResponse {
     socket_id: String,
 }
@@ -152,4 +146,3 @@ impl Handler<BroadcastMessage> for Lobby {
             });
     }
 }
-
