@@ -1,5 +1,14 @@
-use super::messages::{ClientActorMessage, Connect, Disconnect, WsMessage};
-use crate::{handlers::lobby::Lobby, state::AppState};
+use super::{
+    chat_commands::ChatCommand,
+    messages::{ClientActorMessage, Connect, Disconnect, WsMessage},
+};
+use crate::{
+    handlers::{
+        chat_commands::{BroadcastMessage, WhisperMessage},
+        lobby::Lobby,
+    },
+    state::AppState,
+};
 use actix::{
     fut, prelude::ContextFutureSpawner, Actor, ActorContext, ActorFutureExt, Addr, AsyncContext,
     Handler, Running, StreamHandler, WrapFuture,
@@ -9,7 +18,10 @@ use actix_web::{
     Error, HttpRequest, HttpResponse,
 };
 use actix_web_actors::ws;
-use std::time::{Duration, Instant};
+use std::{
+    ops::Deref,
+    time::{Duration, Instant},
+};
 use uuid::Uuid;
 
 /// How often heartbeat pings are sent
@@ -136,11 +148,30 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for ItChannelWs {
                 ctx.stop();
             }
             Ok(ws::Message::Nop) => (),
-            Ok(ws::Message::Text(text)) => self.lobby_address.do_send(ClientActorMessage {
-                id: self.user_socket_id,
-                msg: text.to_string(),
-                room_id: self.it_channel_id,
-            }),
+            Ok(ws::Message::Text(text)) => {
+                let s: &str = text.deref();
+                let Ok(cmd) = serde_json::from_str(s) else {
+                    println!("Some bullshit websocket message shape",);
+                    return;
+                };
+                match cmd {
+                    ChatCommand::Whisper { to_socket, message } => {
+                        self.lobby_address.do_send(WhisperMessage {
+                            channel_id: self.it_channel_id,
+                            to_socket,
+                            message,
+                            user_socket_id: self.user_socket_id,
+                        })
+                    }
+                    ChatCommand::Broadcast { message } => {
+                        self.lobby_address.do_send(BroadcastMessage {
+                            message: message,
+                            user_socket_id: self.user_socket_id,
+                            channel_id: self.it_channel_id,
+                        })
+                    }
+                }
+            }
             Err(e) => panic!("{:?}", e),
         }
     }
@@ -201,9 +232,12 @@ pub async fn ws_it_handler(
 ) -> Result<HttpResponse, Error> {
     //Hard Coded IT Channel UUID:588b3104-c06c-4a1a-aad2-6f820309d1a0
     //TODO make it so fixed channels do not require UUID
-    
-    let ws = ItChannelWs::new(Uuid::parse_str("588b3104-c06c-4a1a-aad2-6f820309d1a0").unwrap(), state.lobby.clone());
-    println!("{:?}",&ws.it_channel_id);
+
+    let ws = ItChannelWs::new(
+        Uuid::parse_str("588b3104-c06c-4a1a-aad2-6f820309d1a0").unwrap(),
+        state.lobby.clone(),
+    );
+    //println!("{:?}", &ws.it_channel_id);
     let resp = ws::start(ws, &req, stream)?;
     Ok(resp)
 }

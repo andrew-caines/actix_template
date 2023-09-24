@@ -5,6 +5,7 @@ pub mod web_socket_handlers;
 pub mod sse_handlers;
 pub mod lobby; //WS Lobby
 pub mod messages; //WS specific Messages
+pub mod chat_commands;
 
 pub mod prelude {
     pub use super::auth_handlers;

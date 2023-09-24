@@ -1,9 +1,17 @@
+use super::chat_commands::{BroadcastMessage, ChatCommand, WhisperMessage};
 use super::messages::{ClientActorMessage, Connect, Disconnect, WsMessage};
+use super::sse_handlers::Broadcaster;
 use actix::prelude::{Actor, Context, Handler, Recipient};
 use serde::Serialize;
 use serde_json::json;
 use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
+
+#[derive(Serialize)]
+enum WsMessageTypes {
+    NewUserConnected,
+    UserDisconnected,
+}
 
 #[derive(Serialize)]
 struct ConnectionResponse {
@@ -51,7 +59,13 @@ impl Handler<Disconnect> for Lobby {
                 .iter()
                 .filter(|conn_id| *conn_id.to_owned() != msg.id)
                 .for_each(|user_id| {
-                    self.send_message(&format!("{} disconnected.", &msg.id), user_id)
+                    let response = json!({
+                        "type":"WS_DISCONNECTED_USER",
+                        "socket_id": &msg.id,
+                        "success":true
+                    });
+                    self.send_message(&response.to_string(), user_id);
+                    //self.send_message(&format!("{} disconnected.", &msg.id), user_id)
                 });
             if let Some(lobby) = self.rooms.get_mut(&msg.room_id) {
                 if lobby.len() > 1 {
@@ -82,18 +96,61 @@ impl Handler<Connect> for Lobby {
             .iter()
             .filter(|conn_id| *conn_id.to_owned() != msg.self_id)
             .for_each(|conn_id| {
-                self.send_message(&format!("{} just joined!", msg.self_id), conn_id)
+                let response = json!({
+                    "type":"WS_CONNECTION_NEWUSER",
+                    "socket_id": &conn_id,
+                    "success":true
+                });
+                self.send_message(&response.to_string(), conn_id)
             });
 
         // store the address
         self.sessions.insert(msg.self_id, msg.addr);
 
         let response = json!({
+            "type":"WS_CONNECTION_SUCCESS",
             "socket_id": &msg.self_id,
             "success":true
         });
         // send self your new uuid
         self.send_message(&response.to_string(), &msg.self_id);
+    }
+}
+
+//Custom Struct Types for Direct Message types.
+impl Handler<WhisperMessage> for Lobby {
+    type Result = ();
+    fn handle(&mut self, msg: WhisperMessage, _ctx: &mut Self::Context) -> Self::Result {
+        let response = json!({
+            "type":"WS_MESSAGE_WHISPER",
+            "from_socket": msg.user_socket_id,
+            "to_socket": &msg.to_socket,
+            "message": msg.message,
+        });
+        self.send_message(&response.to_string(), &msg.to_socket);
+    }
+}
+
+impl Handler<BroadcastMessage> for Lobby {
+    type Result = ();
+    fn handle(&mut self, msg: BroadcastMessage, _ctx: &mut Self::Context) -> Self::Result {
+        let message = &msg.message;
+        self.rooms
+            .get(&msg.channel_id)
+            .unwrap()
+            .iter()
+            .for_each(|client| {
+                let response = json!({
+                    "type":"WS_MESSAGE",
+                    "from_socket": &msg.user_socket_id,
+                    "to_socket":"ALL",
+                    "message":message,
+                });
+                self.send_message(
+                    &format!("{}", serde_json::to_string_pretty(&response).unwrap()),
+                    client,
+                )
+            });
     }
 }
 
@@ -110,14 +167,32 @@ impl Handler<ClientActorMessage> for Lobby {
                     .map(|chunk| chunk.to_string())
                     .collect::<Vec<String>>()
                     .join(" ");
-                self.send_message(&message, &id_to);
+                let response = json!({
+                    "type":"WS_MESSAGE",
+                    "from_socket": &msg.id,
+                    "to_socket": &id_to,
+                    "message": message,
+                });
+                self.send_message(&response.to_string(), &id_to);
             }
         } else {
+            let message = &msg.msg;
             self.rooms
                 .get(&msg.room_id)
                 .unwrap()
                 .iter()
-                .for_each(|client| self.send_message(&msg.msg, client));
+                .for_each(|client| {
+                    let response = json!({
+                        "type":"WS_MESSAGE",
+                        "from_socket": &msg.id,
+                        "to_socket":"ALL",
+                        "message":message,
+                    });
+                    self.send_message(
+                        &format!("{}", serde_json::to_string_pretty(&response).unwrap()),
+                        client,
+                    )
+                });
         }
     }
 }

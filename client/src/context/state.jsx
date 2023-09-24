@@ -1,13 +1,17 @@
 import React, { useReducer, useEffect, useMemo } from "react";
 import state_reducer from "./state_reducers.js";
 import { LoginUser, LogoutUser } from "./auth_api.js";
+const worker_webSocket = new Worker(
+  new URL("./worker_websocket.js", import.meta.url)
+);
 
 //Setup Intital State Configuration.
 const initalState = {
   isLoggedIn: false,
-  applicationName: "APP NAME",
+  applicationName: "IT-DASH",
   token: "",
   username: "",
+  it_ws_message: [],
 };
 
 //Create Context
@@ -19,7 +23,16 @@ export const StateProvider = (props) => {
   useEffect(() => {
     //One time run on Boot of Context
     console.log(`🌎 - Global State initialized.`);
+    
   }, []);
+
+  useEffect(()=>{
+    worker_webSocket.onmessage = (message) => {
+      //Handle message FROM the web-worker here.
+      console.log(`Message from websocket web worker ${JSON.stringify(message.data)}`);
+      dispatch({type:"it_channel_message",payload: message.data.payload});
+    };
+  },[state]);
 
   const login_user = async (username, password) => {
     let result = await LoginUser(username, password);
