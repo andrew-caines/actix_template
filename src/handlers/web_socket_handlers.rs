@@ -1,6 +1,6 @@
 use super::{
     chat_commands::ChatCommand,
-    messages::{ClientActorMessage, Connect, Disconnect, WsMessage},
+    messages::{Connect, Disconnect, WsMessage},
 };
 use crate::{
     handlers::{

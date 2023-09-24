@@ -1,6 +1,5 @@
-use super::chat_commands::{BroadcastMessage, ChatCommand, WhisperMessage};
-use super::messages::{ClientActorMessage, Connect, Disconnect, WsMessage};
-use super::sse_handlers::Broadcaster;
+use super::chat_commands::{BroadcastMessage, WhisperMessage};
+use super::messages::{Connect, Disconnect, WsMessage};
 use actix::prelude::{Actor, Context, Handler, Recipient};
 use serde::Serialize;
 use serde_json::json;
@@ -154,45 +153,3 @@ impl Handler<BroadcastMessage> for Lobby {
     }
 }
 
-impl Handler<ClientActorMessage> for Lobby {
-    type Result = ();
-
-    fn handle(&mut self, msg: ClientActorMessage, _: &mut Context<Self>) -> Self::Result {
-        if msg.msg.starts_with("\\w") {
-            if let Some(id_to) = msg.msg.split(' ').collect::<Vec<&str>>().get(1) {
-                let id_to = Uuid::parse_str(id_to).unwrap();
-                let stripped_msg = msg.msg.split(' ').collect::<Vec<&str>>();
-                let message = stripped_msg[2..]
-                    .into_iter()
-                    .map(|chunk| chunk.to_string())
-                    .collect::<Vec<String>>()
-                    .join(" ");
-                let response = json!({
-                    "type":"WS_MESSAGE",
-                    "from_socket": &msg.id,
-                    "to_socket": &id_to,
-                    "message": message,
-                });
-                self.send_message(&response.to_string(), &id_to);
-            }
-        } else {
-            let message = &msg.msg;
-            self.rooms
-                .get(&msg.room_id)
-                .unwrap()
-                .iter()
-                .for_each(|client| {
-                    let response = json!({
-                        "type":"WS_MESSAGE",
-                        "from_socket": &msg.id,
-                        "to_socket":"ALL",
-                        "message":message,
-                    });
-                    self.send_message(
-                        &format!("{}", serde_json::to_string_pretty(&response).unwrap()),
-                        client,
-                    )
-                });
-        }
-    }
-}
