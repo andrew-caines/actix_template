@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Accordion, NavLink } from "@mantine/core";
 
 export default function SseNavGroup(props) {
-  let navigate = useNavigate();
+  const navigate = useNavigate();
   return (
     <Accordion>
       <Accordion.Item value="SSE">

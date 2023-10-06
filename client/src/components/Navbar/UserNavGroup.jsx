@@ -1,6 +1,4 @@
-import { AiOutlineUser } from "react-icons/ai";
-import { RiUser2Line } from "react-icons/ri";
-import { GrUserAdmin } from "react-icons/gr";
+import { AiOutlineUser, AiOutlineUserAdd } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
 import { Accordion, NavLink } from "@mantine/core";
 
@@ -15,26 +13,11 @@ export default function UserNavGroup(props) {
         <Accordion.Panel>
           <NavLink
             label="User Admin"
-            leftSection={<GrUserAdmin size={16} color="red" />}
+            leftSection={<AiOutlineUserAdd size={16} color="#183EFA" />}
             onClick={() => navigate("/user/admin")}
           />
-         
-          
         </Accordion.Panel>
       </Accordion.Item>
     </Accordion>
   );
 }
-
-/*
-
-<NavLink
-label="List Users"
-icon={<GoLog size={16} color="#B18C65" />}
-/>
-<NavLink
-label="Delete User"
-icon={<RiUser2Line size={16} color="#005AFF" />}
-/>
-
-*/

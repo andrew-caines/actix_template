@@ -40,7 +40,7 @@ export default function AppHeader({ opened, toggle }) {
         {state.isLoggedIn ? (
           <Button onClick={() => logout_user()}>Logout</Button>
         ) : (
-          <Button onClick={() => setLoginModalState(true)}>Login</Button>
+          <Button onClick={() => setLoginModalState(true)} className="pulse-button">Login</Button>
         )}
       </Group>
       <LoginModal
