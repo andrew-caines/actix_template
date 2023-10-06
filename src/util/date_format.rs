@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 pub const DATE_FMT_SHORT: &str = "%d/%m/%y %H:%M:%S";
 pub const DATE_FMT_LOCALE: &str = "%x";
 
