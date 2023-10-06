@@ -28,6 +28,7 @@ async fn validator(
     let jwt_secret: String = std::env::var("JWT_SECRET").expect("JWT_SECRET must be set!");
     let key: Hmac<Sha256> = Hmac::new_from_slice(jwt_secret.as_bytes()).unwrap();
     let token_string = credentials.token();
+    println!("token_string {:?}", &token_string);
     let claims: Result<TokenClaims, &str> = token_string
         .verify_with_key(&key)
         .map_err(|_| "Invalid token");
@@ -54,8 +55,8 @@ pub fn user_routes_factory(cfg: &mut ServiceConfig) {
     let cors = Cors::permissive();
     cfg.service(
         scope("/users")
-            .wrap(cors)
             .wrap(bearer_middleware)
+            .wrap(cors)
             .route("list", get().to(get_all_users)),
     );
 }

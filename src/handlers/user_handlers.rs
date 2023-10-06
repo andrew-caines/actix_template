@@ -6,13 +6,12 @@ use actix_web::{
     web::{Data, ReqData},
     HttpResponse, Responder,
 };
-use chrono::Local;
+
 use serde::Serialize;
 use sqlx::FromRow;
 
-use crate::util::date_format::DATE_FMT_SHORT;
-use crate::state::AppState;
 use super::auth_handlers::TokenClaims;
+use crate::state::AppState;
 
 #[derive(Serialize, FromRow, Debug)]
 struct AllUsersResponse {
@@ -31,9 +30,8 @@ pub async fn get_all_users(
     state: Data<AppState>,
     req_user: Option<ReqData<TokenClaims>>,
 ) -> impl Responder {
-    let now = Local::now();
     let r = req_user.unwrap();
-    let response = format!("[{:?}] -> [{:?}] accessed /users/list ", now.format(DATE_FMT_SHORT).to_string(), r.username);
+    let response = format!("[{:?}] accessed /users/list ", r.username);
     let all_users = sqlx::query_as::<_, User>(
         "SELECT 
             id, 

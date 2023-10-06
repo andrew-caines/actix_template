@@ -23,7 +23,6 @@ export const StateProvider = (props) => {
   useEffect(() => {
     //One time run on Boot of Context
     console.log(`🌎 - Global State initialized.`);
-    
   }, []);
 
   useEffect(()=>{

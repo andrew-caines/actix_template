@@ -9,6 +9,7 @@ import {
 } from "@mantine/core";
 import { TbPlugConnected, TbPlugConnectedX } from "react-icons/tb";
 import { FaEraser } from "react-icons/fa6";
+
 export default function WatchSSEStream(props) {
   const theme = useMantineTheme();
   const [connected, setConnected] = useState(false);
