@@ -15,6 +15,7 @@ use crate::handlers::sse_handlers::Broadcaster;
 mod handlers;
 mod routes;
 mod state;
+mod util;
 
 #[actix_rt::main]
 async fn main() -> io::Result<()> {
@@ -63,6 +64,7 @@ async fn main() -> io::Result<()> {
             .configure(routes::sse_factory)
             .configure(routes::websocket_factory)
             .configure(routes::protected_routes_factory)
+            .configure(routes::user_routes_factory)
     })
     .bind((server_ip, server_port))?
     .run()

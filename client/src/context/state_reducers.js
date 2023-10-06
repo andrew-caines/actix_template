@@ -9,6 +9,7 @@ export default function state_reducer(state, action) {
     case "set_is_loggedIn":
       return { ...state, isLoggedIn: action.payload };
     case "set_jwt_token":
+      console.log(`token: ${action.payload}`)
       return { ...state, token: action.payload };
     default:
       return state;

@@ -14,12 +14,12 @@ export default function SseNavGroup(props) {
         <Accordion.Panel>
           <NavLink
             label="Watch General SSE Stream"
-            icon={<BiGlassesAlt size={16} color="#CBA3B2" />}
+            leftSection={<BiGlassesAlt size={16} color="#CBA3B2" />}
             onClick={() => navigate("/sse/general")}
           />
           <NavLink
             label="Send Message to General"
-            icon={<BiMailSend size={16} color="#599F68" />}
+            leftSection={<BiMailSend size={16} color="#599F68" />}
             onClick={() => navigate("/sse/sendToAll")}
           />
         </Accordion.Panel>

@@ -38,6 +38,8 @@ import ApplicationTest, {
 //SSE Section Pages
 import SendToSSEStream from "./pages/SSE/SendToSSEStream.jsx";
 import WatchSSEStream from "./pages/SSE/WatchSSEStream.jsx";
+//User Control Pages
+import UserAdmin from "./pages/User/UserAdmin.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -69,6 +71,11 @@ const router = createBrowserRouter(
       <Route
         path="/sse/sendToAll"
         element={<SendToSSEStream />}
+        errorElement={<GeneralError />}
+      />
+      <Route
+        path="/user/admin"
+        element={<UserAdmin />}
         errorElement={<GeneralError />}
       />
       <Route path="*" element={<Error404 />} />

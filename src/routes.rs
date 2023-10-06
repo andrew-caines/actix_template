@@ -1,4 +1,5 @@
 use crate::handlers::all_auth_handlers::{create_user, login, logout, protected_test, TokenClaims};
+use crate::handlers::all_user_handlers::get_all_users;
 use crate::handlers::all_util_handlers::get_health_check;
 use crate::handlers::all_websocket_handlers::{ws_echo_handler, ws_it_handler};
 use crate::handlers::health_check::{get_echo_time, get_handler_logs};
@@ -48,6 +49,17 @@ async fn validator(
     }
 }
 
+pub fn user_routes_factory(cfg: &mut ServiceConfig) {
+    let bearer_middleware = HttpAuthentication::bearer(validator);
+    let cors = Cors::permissive();
+    cfg.service(
+        scope("/users")
+            .wrap(cors)
+            .wrap(bearer_middleware)
+            .route("list", get().to(get_all_users)),
+    );
+}
+
 pub fn auth_routes_factory(cfg: &mut ServiceConfig) {
     //FOR DEV ONLY, REMOVE CORS STUFF FOR PRODUCTION OR UPDATE TO BE CORRECT
     let cors = Cors::permissive();
@@ -87,7 +99,6 @@ pub fn websocket_factory(cfg: &mut ServiceConfig) {
             .route("/echo", get().to(ws_echo_handler))
             .route("/it", get().to(ws_it_handler)),
     );
-   
 }
 
 pub fn static_webserver_factory(cfg: &mut ServiceConfig) {

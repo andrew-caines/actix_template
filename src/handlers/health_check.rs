@@ -122,10 +122,13 @@ pub async fn get_handler_logs(
     .fetch_all(&app_state.pg_db)
     .await
     .unwrap();
+
     let count: (i64,) = sqlx::query_as("SELECT COUNT(log_id) FROM handler_logs")
         .fetch_one(&app_state.pg_db)
         .await
         .unwrap();
+
+    //let count = logs.len() as i64;
     let result = HandlerLogsPlusCount {
         count: count.0,
         logs: logs,

@@ -151,7 +151,7 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for ItChannelWs {
             Ok(ws::Message::Text(text)) => {
                 let s: &str = text.deref();
                 let Ok(cmd) = serde_json::from_str(s) else {
-                    println!("Some bullshit websocket message shape",);
+                    println!("A Message has been received that doesn't conform to a known Message Shape. {:?}",&s);
                     return;
                 };
                 match cmd {
